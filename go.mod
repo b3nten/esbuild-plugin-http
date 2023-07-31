@@ -1,4 +1,4 @@
-module github.com/B3nten/esbuild-plugin-importmap
+module github.com/B3nten/esbuild-plugin-http
 
 go 1.20
 
