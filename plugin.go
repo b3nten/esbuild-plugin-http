@@ -1,17 +1,16 @@
 package plugin
 
 import (
-	"github.com/B3nten/esbuild-plugin-importmap/importmap"
 	"github.com/evanw/esbuild/pkg/api"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
 )
 
-func NewPlugin(importMap *importmap.ImportMap) api.Plugin {
+func NewPluginWithImportMap(importMap *ImportMap) api.Plugin {
 	return api.Plugin{
-		Name: "http",
+		Name: "importmap",
 		Setup: func(build api.PluginBuild) {
 			build.OnResolve(api.OnResolveOptions{Filter: `.*`},
 				func(args api.OnResolveArgs) (api.OnResolveResult, error) {
@@ -51,21 +50,6 @@ func NewPlugin(importMap *importmap.ImportMap) api.Plugin {
 						Path: result.Path,
 					}, nil
 				})
-			build.OnResolve(api.OnResolveOptions{Filter: ".*", Namespace: "http-url"},
-				func(args api.OnResolveArgs) (api.OnResolveResult, error) {
-					base, err := url.Parse(args.Importer)
-					if err != nil {
-						return api.OnResolveResult{}, err
-					}
-					relative, err := url.Parse(args.Path)
-					if err != nil {
-						return api.OnResolveResult{}, err
-					}
-					return api.OnResolveResult{
-						Path:      base.ResolveReference(relative).String(),
-						Namespace: "http-url",
-					}, nil
-				})
 			build.OnLoad(api.OnLoadOptions{Filter: ".*", Namespace: "http-url"},
 				func(args api.OnLoadArgs) (api.OnLoadResult, error) {
 					res, err := http.Get(args.Path)
@@ -73,7 +57,7 @@ func NewPlugin(importMap *importmap.ImportMap) api.Plugin {
 						return api.OnLoadResult{}, err
 					}
 					defer res.Body.Close()
-					bytes, err := ioutil.ReadAll(res.Body)
+					bytes, err := io.ReadAll(res.Body)
 					if err != nil {
 						return api.OnLoadResult{}, err
 					}
@@ -82,4 +66,8 @@ func NewPlugin(importMap *importmap.ImportMap) api.Plugin {
 				})
 		},
 	}
+}
+
+func NewPlugin() api.Plugin {
+	return NewPluginWithImportMap(&ImportMap{})
 }
