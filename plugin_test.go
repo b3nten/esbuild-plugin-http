@@ -3,7 +3,7 @@ package plugin_test
 import (
 	"encoding/json"
 	"fmt"
-	plugin "github.com/B3nten/esbuild-plugin-importmap"
+	plugin "github.com/B3nten/esbuild-plugin-http"
 	"github.com/evanw/esbuild/pkg/api"
 	"io"
 	"os"
